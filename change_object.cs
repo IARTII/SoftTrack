@@ -76,8 +76,6 @@ namespace SoftTrack
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(dateTimePicker2.Value.ToString("yyyy-MM-dd"));
-
             string ExtractId(string comboBoxValue)
             {
                 return string.IsNullOrEmpty(comboBoxValue) ? "" : comboBoxValue.Split(':')[0].Trim();
