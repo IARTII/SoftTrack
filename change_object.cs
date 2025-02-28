@@ -30,23 +30,13 @@ namespace SoftTrack
             {
                 case "Clients":
                     groupBox1.Enabled = true;
-                    List<string> Software = parentForm.dataBase.SearchSoftware();
-                    comboBox2.Items.Clear();
-                    foreach (var item in Software)
-                    {
-                        comboBox2.Items.Add(item);
-                    }
+                    LoadComboBox(comboBox2, parentForm.dataBase.SearchSoftware());
                     LoadClientData();
                     break;
 
                 case "Software":
                     groupBox2.Enabled = true;
-                    List<string> SoftwareCreators = parentForm.dataBase.SearchSoftwareCreators();
-                    comboBox1.Items.Clear();
-                    foreach (var item in SoftwareCreators)
-                    {
-                        comboBox1.Items.Add(item);
-                    }
+                    LoadComboBox(comboBox1, parentForm.dataBase.SearchSoftwareCreators());
                     LoadSoftwareData();
                     break;
 
@@ -57,20 +47,19 @@ namespace SoftTrack
 
                 case "Support":
                     groupBox4.Enabled = true;
-                    List<string> Clients = parentForm.dataBase.SearchClient();
-                    List<string> Softwares = parentForm.dataBase.SearchSoftware();
-                    comboBox3.Items.Clear();
-                    comboBox4.Items.Clear();
-                    foreach (var item in Clients)
-                    {
-                        comboBox3.Items.Add(item);
-                    }
-                    foreach (var item in Softwares)
-                    {
-                        comboBox4.Items.Add(item);
-                    }
+                    LoadComboBox(comboBox3, parentForm.dataBase.SearchClient());
+                    LoadComboBox(comboBox4, parentForm.dataBase.SearchSoftware());
                     LoadSupportData();
                     break;
+            }
+        }
+
+        private void LoadComboBox(ComboBox comboBox, List<string> data)
+        {
+            comboBox.Items.Clear();
+            foreach (var item in data)
+            {
+                comboBox.Items.Add(item);
             }
         }
 
@@ -130,7 +119,12 @@ namespace SoftTrack
                         textBox1.Text = reader["Name"].ToString();
                         textBox2.Text = reader["E-mail"].ToString();
                         textBox3.Text = reader["Phone"].ToString();
-                        comboBox2.SelectedItem = reader["software_id"].ToString();
+
+                        string softwareId = reader["software_id"].ToString();
+                        comboBox2.SelectedItem = comboBox2.Items
+                            .Cast<string>()
+                            .FirstOrDefault(item => item.StartsWith(softwareId + " :"));
+
                         dateTimePicker1.Value = Convert.ToDateTime(reader["sale_date"]);
                         dateTimePicker2.Value = Convert.ToDateTime(reader["support_end"]);
                     }
@@ -153,7 +147,11 @@ namespace SoftTrack
                         textBox5.Text = reader["category"].ToString();
                         textBox6.Text = reader["license type"].ToString();
                         textBox7.Text = reader["Price"].ToString();
-                        comboBox1.SelectedItem = reader["creator_id"].ToString();
+
+                        string creatorId = reader["creator_id"].ToString();
+                        comboBox1.SelectedItem = comboBox1.Items
+                            .Cast<string>()
+                            .FirstOrDefault(item => item.StartsWith(creatorId + " :"));
                     }
                 }
             }
@@ -189,8 +187,17 @@ namespace SoftTrack
                 {
                     if (reader.Read())
                     {
-                        comboBox3.SelectedItem = reader["client_id"].ToString();
-                        comboBox4.SelectedItem = reader["sofware_id"].ToString();
+                        string clientId = reader["client_id"].ToString();
+                        string softwareId = reader["sofware_id"].ToString();
+
+                        comboBox3.SelectedItem = comboBox3.Items
+                            .Cast<string>()
+                            .FirstOrDefault(item => item.StartsWith(clientId + " :"));
+
+                        comboBox4.SelectedItem = comboBox4.Items
+                            .Cast<string>()
+                            .FirstOrDefault(item => item.StartsWith(softwareId + " :"));
+
                         textBox11.Text = reader["problem"].ToString();
                         textBox12.Text = reader["Status"].ToString();
                         dateTimePicker3.Value = Convert.ToDateTime(reader["Request_date"]);
@@ -199,5 +206,6 @@ namespace SoftTrack
                 }
             }
         }
+
     }
 }

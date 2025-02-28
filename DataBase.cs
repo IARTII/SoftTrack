@@ -293,18 +293,22 @@ namespace SoftTrack
 
         public int UpdateSoftwarePrice(int creatorId, decimal priceIncrement)
         {
-            sqlConnection.Open();
-            using (SqlCommand command = new SqlCommand("UpdateSoftwarePrice", sqlConnection))
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@CreatorID", creatorId);
-                command.Parameters.AddWithValue("@PriceIncrement", priceIncrement);
+                sqlConnection.Open();
+                using (SqlCommand command = new SqlCommand("UpdateSoftwarePrice", sqlConnection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@CreatorID", creatorId);
+                    command.Parameters.AddWithValue("@PriceIncrement", priceIncrement);
 
-                int affectedRows = command.ExecuteNonQuery();
-                sqlConnection.Close();
-                return affectedRows;
+                    var result = command.ExecuteScalar();
+                    sqlConnection.Close();
+                    return (result != null) ? Convert.ToInt32(result) : 0;
+                }
             }
         }
+
 
         public int CountClientsForUpdate(int softwareId)
         {
@@ -313,13 +317,14 @@ namespace SoftTrack
                 openConnection();
                 using (SqlCommand cmd = new SqlCommand("SELECT dbo.CountClientsForUpdate(@SoftwareID)", sqlConnection))
                 {
-                    cmd.Parameters.AddWithValue("@SoftwareID", softwareId);
-                    return (int)cmd.ExecuteScalar();
+                    cmd.Parameters.Add("@SoftwareID", SqlDbType.Int).Value = softwareId;
+                    object result = cmd.ExecuteScalar();
+                    return (result != DBNull.Value) ? Convert.ToInt32(result) : 0;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка получения количества клиентов: " + ex.Message);
+                MessageBox.Show($"Ошибка получения количества клиентов: {ex.Message}\n{ex.StackTrace}");
                 return -1;
             }
             finally
